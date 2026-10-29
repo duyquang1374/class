@@ -381,7 +381,28 @@ def handler_for(store, serial_bridge=None):
             self.end_headers()
             self.wfile.write(data)
 
+        def do_HEAD(self):
+            path = urlparse(self.path).path
+            if path.startswith('/api/'):
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                return
+            target = (ROOT / 'dist' / (path.lstrip('/') or 'index.html')).resolve()
+            if not target.is_relative_to((ROOT / 'dist').resolve()) or not target.is_file():
+                self.send_response(404)
+                self.end_headers()
+                return
+            data = target.read_bytes()
+            self.send_response(200)
+            content_type = mimetypes.guess_type(str(target))[0] or 'application/octet-stream'
+            self.send_header('Content-Type', content_type + ('; charset=utf-8' if content_type.startswith('text/') or content_type in ('application/javascript', 'application/json') else ''))
+            self.send_header('Content-Length', str(len(data)))
+            self.send_header('X-Content-Type-Options', 'nosniff')
+            self.end_headers()
+
         def do_POST(self):
+
             path = urlparse(self.path).path
             device = path.startswith('/api/device/')
             if path == '/api/local-session':
