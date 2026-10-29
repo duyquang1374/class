@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: phonghoc-phucloi
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    envVars:
+      - key: PORT
+        value: 10000

@@ -460,7 +460,7 @@ def handler_for(store, serial_bridge=None):
     return Handler
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--host', default='0.0.0.0')
     parser.add_argument('--port', type=int, default=int(os.environ.get('PORT', 8080)))
@@ -480,3 +480,8 @@ if __name__ == '__main__':
         server.server_close()
     finally:
         serial_bridge.disconnect(forget=False)
+
+
+if __name__ == '__main__':
+    main()
+
