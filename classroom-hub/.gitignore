@@ -1,0 +1,7 @@
+data/
+__pycache__/
+*.pyc
+.env
+.venv/
+*.tar.gz
+firmware/classroom_esp32/config.h

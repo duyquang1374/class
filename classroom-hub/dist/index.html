@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#122d32">
+  <meta name="description" content="Trường Tiểu học Phúc Lợi · Quản lý trường chính và phân hiệu, điểm danh RFID và theo dõi thiết bị lớp học.">
+  <title>Tiểu học Phúc Lợi · Quản lý nhà trường</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="school.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <a href="#overview" class="brand"><span class="brand-mark" data-icon="school"></span><span>phúc lợi<span class="brand-dot">.</span><small>TRƯỜNG TIỂU HỌC PHÚC LỢI</small></span></a>
+    <div class="workspace"><span class="workspace-icon" data-icon="school"></span><div>Tiểu học Phúc Lợi<small>Trường chính & Phân hiệu</small></div></div>
+    <div class="nav-label">KHÔNG GIAN LÀM VIỆC</div>
+    <nav aria-label="Điều hướng chính">
+      <a href="#overview" data-nav="overview" class="active"><span data-icon="grid"></span>Tổng quan trường<span class="nav-pip"></span></a>
+      <a href="#classes" data-nav="classes"><span data-icon="school"></span>Quản lý lớp học<span class="nav-count">4</span></a>
+      <a href="#students" data-nav="students"><span data-icon="users"></span>Học sinh</a>
+      <a href="#activity" data-nav="activity"><span data-icon="clock"></span>Lịch sử điểm danh</a>
+      <a href="#devices" data-nav="devices"><span data-icon="cpu"></span>Thiết bị & kết nối</a>
+    </nav>
+    <div class="sidebar-bottom"><div class="device-mini"><span class="mini-device-icon" data-icon="radio"></span><strong>ESP32 DevKit V1</strong><small id="sidebar-device">Chưa kết nối thiết bị</small><span class="mini-bar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div><button class="help-button" id="help-button"><span data-icon="help"></span>Hướng dẫn sử dụng<span data-icon="arrow-up-right"></span></button><div class="profile"><div class="avatar">BGH</div><div>Ban giám hiệu<small>Hiệu trưởng / Quản lý</small></div><button class="icon-button" id="profile-settings" aria-label="Cài đặt kết nối"><span data-icon="settings"></span></button></div></div>
+  </aside>
+  <div class="app-shell">
+    <header class="topbar"><div class="breadcrumbs"><button id="mobile-menu" class="icon-button mobile-only" aria-label="Mở menu"><span data-icon="menu"></span></button><span>Không gian làm việc</span><span class="slash">/</span><strong id="breadcrumb">Tổng quan</strong></div><div class="topbar-right"><span id="current-date"></span><span class="top-divider"></span><button class="icon-button" id="notification-button" aria-label="Xem thông báo"><span data-icon="bell"></span><i class="notification-dot"></i></button><div class="avatar small">BGH</div></div></header>
+    <main>
+      <div class="page-heading"><div><div class="eyebrow">TRƯỜNG TIỂU HỌC PHÚC LỢI</div><h1 id="page-title">Tổng quan nhà trường<span class="heading-dot">.</span></h1><p id="page-description">Kết nối trường chính và phân hiệu trong một không gian quản lý.</p></div><div class="heading-actions"><button class="button secondary" id="export-button"><span data-icon="download"></span>Xuất báo cáo</button><button class="button primary" id="add-student"><span data-icon="plus"></span>Thêm học sinh</button></div></div>
+      <div class="mode-banner"><div><span class="demo-dot"></span><strong id="mode-label">Chế độ dùng thử</strong><span id="mode-description">Dữ liệu mẫu · Sẵn sàng để bạn khám phá</span></div><button id="mode-button">Kết nối thiết bị thật<span data-icon="arrow-right"></span></button></div>
+      <div class="scope-bar"><div><span data-icon="school"></span><strong id="scope-caption">Toàn trường</strong><span class="muted">/ Góc quản lý</span></div><label for="campus-selector">Cơ sở<select id="campus-selector"><option value="all">Toàn trường</option><option value="main">Trường chính</option><option value="branch">Phân hiệu</option></select></label></div>
+      <section class="class-picker" aria-label="Chọn lớp học" id="class-picker" hidden></section>
+      <div id="content"></div>
+      <footer><span><i class="footer-dot"></i> Tiểu học Phúc Lợi · Kết nối trường chính & phân hiệu</span><span>RFID + ESP32 <span class="footer-separator">/</span> <span id="clock"></span></span></footer>
+    </main>
+  </div>
+  <dialog id="student-dialog">
+    <form id="student-form">
+      <div class="dialog-heading">
+        <div><span class="eyebrow">LỚP 1A1</span><h2 id="student-dialog-title">Thêm học sinh</h2></div>
+        <button type="button" class="icon-button" data-close="student-dialog" aria-label="Đóng"><span data-icon="x"></span></button>
+      </div>
+      <input type="hidden" id="student-id">
+      
+      <div id="student-input-view">
+        <label>Họ và tên học sinh
+          <input id="student-name" required maxlength="100" placeholder="Ví dụ: Nguyễn Minh Anh" autocomplete="name">
+        </label>
+        
+        <div class="enroll-choice-card">
+          <div class="enroll-choice-header">
+            <span class="enroll-badge-icon" data-icon="card"></span>
+            <div>
+              <strong>Gán thẻ RFID tự động (Khuyến nghị)</strong>
+              <p>Sau khi nhấn nút, hãy chạm thẻ học sinh vào đầu đọc RC522. Màn hình LCD và Web sẽ phản hồi kết quả tức thì.</p>
+            </div>
+          </div>
+          <button type="button" class="button primary full-width" id="btn-start-enroll">
+            <span data-icon="card"></span>Xác nhận &amp; Bắt đầu quét thẻ
+          </button>
+        </div>
+
+        <div class="manual-uid-toggle">
+          <button type="button" class="inline-link" id="toggle-manual-uid">Hoặc nhập mã thẻ thủ công <span data-icon="chevron"></span></button>
+        </div>
+
+        <div id="manual-uid-field" hidden>
+          <label>UID thẻ RFID (thủ công)
+            <input id="student-uid" maxlength="29" placeholder="Ví dụ: A1 B2 C3 D4" spellcheck="false">
+          </label>
+          <p class="form-hint" id="uid-hint">Mã UID 8, 14 hoặc 20 ký tự hex.</p>
+        </div>
+
+        <p id="student-error" class="form-error" role="alert"></p>
+
+        <div class="dialog-actions">
+          <button type="button" class="button secondary" data-close="student-dialog">Hủy</button>
+          <button class="button primary" type="submit" id="btn-manual-submit" hidden>Lưu thủ công</button>
+        </div>
+      </div>
+
+      <div id="student-enroll-view" hidden>
+        <div class="enroll-scan-box">
+          <div class="radar-pulse-wrap">
+            <div class="radar-ring r1"></div>
+            <div class="radar-ring r2"></div>
+            <div class="radar-core"><span data-icon="card"></span></div>
+          </div>
+          <h3 id="enroll-scan-heading">Đang chờ đặt thẻ lên đầu đọc...</h3>
+          <div class="enroll-student-name">Học sinh: <strong id="enroll-student-name-display"></strong></div>
+          <p class="enroll-status-hint" id="enroll-status-hint">Hãy chạm thẻ RFID lên đầu đọc RC522 trên thiết bị. Màn hình LCD 1602 đang hiển thị yêu cầu đặt thẻ.</p>
+          
+          <div id="enroll-feedback-banner" class="enroll-banner" hidden></div>
+        </div>
+
+        <div class="dialog-actions" style="justify-content:center;margin-top:20px">
+          <button type="button" class="button secondary" id="btn-cancel-enroll">Hủy quét</button>
+          <button type="button" class="button primary" id="btn-retry-enroll" hidden><span data-icon="card"></span>Thử lại thẻ khác</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+  <dialog id="connection-dialog"><form id="connection-form">
+    <div class="dialog-heading"><div><span class="eyebrow">DỮ LIỆU TỪ LỚP HỌC</span><h2>Kết nối ESP32</h2></div><button type="button" class="icon-button" data-close="connection-dialog" aria-label="Đóng"><span data-icon="x"></span></button></div>
+    <div class="connection-tabs" aria-label="Phương thức kết nối"><button type="button" data-connection-transport="wifi" class="selected" aria-pressed="true"><span data-icon="wifi"></span>Qua Wi-Fi</button><button type="button" data-connection-transport="usb" aria-pressed="false"><span data-icon="cpu"></span>Cổng COM / USB</button></div>
+    <div id="wifi-connection-panel"><div class="instruction-box"><strong>ESP32 → Wi-Fi → Máy tính → Trang web</strong><p>Chạy máy chủ trên máy tính và kết nối ESP32 vào cùng mạng Wi-Fi. Khi mở bằng localhost trên chính máy đó, bạn có thể kết nối trực tiếp mà không cần tự chép khóa.</p></div><label>Khóa quản trị<input id="admin-token" type="password" placeholder="Tự động trên localhost; nhập khóa khi dùng qua LAN" autocomplete="off"></label><p class="form-hint">Khóa dùng qua mạng LAN nằm trong data/credentials.json. Bản website trực tuyến dùng để trải nghiệm.</p></div>
+    <div id="usb-connection-panel" hidden><div class="instruction-box"><strong>ESP32 → Cáp USB → Cổng COM → Trang web</strong><p>Điểm danh và cảm biến truyền trực tiếp qua cáp, không phụ thuộc Wi-Fi của ESP32. Dùng chương trình ESP32 có hỗ trợ COM đi kèm dự án.</p></div>
+      <div id="remote-com-notice" class="local-com-notice" hidden><p>Mở giao diện trên máy tính đang cắm ESP32 để chọn cổng COM. Không cần nhập khóa quản trị khi mở bằng localhost.</p><a id="open-local-com" class="button primary" href="http://localhost:8080/#connect-com">Mở kết nối COM trên máy này <span data-icon="arrow-up-right"></span></a></div>
+      <div id="local-com-controls"><label>Cổng COM<select id="com-port" aria-label="Cổng COM"><option value="">Đang tìm cổng...</option></select></label><div class="com-tools"><span>115200 baud · ESP32 DevKit V1</span><button type="button" class="inline-link" id="refresh-com-ports">Tải lại cổng</button></div><div id="serial-connection-status" class="serial-status" role="status">Chưa kết nối cổng COM</div><button type="button" id="disconnect-com" class="inline-link" hidden>Ngắt COM</button></div>
+    </div>
+    <p id="connection-error" class="form-error" role="alert"></p><div class="dialog-actions"><button type="button" class="button secondary" id="demo-mode-button">Dùng dữ liệu mẫu</button><button type="submit" class="button primary" id="connection-submit">Kết nối</button></div>
+  </form></dialog>
+  <dialog id="camera-dialog"><form id="camera-form"><div class="dialog-heading"><div><span class="eyebrow">QUAN SÁT LỚP HỌC</span><h2>Cài đặt camera</h2></div><button type="button" class="icon-button" data-close="camera-dialog" aria-label="Đóng"><span data-icon="x"></span></button></div><p class="form-hint">ESP32 DevKit V1 không tích hợp camera. Dùng webcam trên máy tính hoặc luồng MJPEG từ camera IP / ESP32-CAM riêng.</p><label>Nguồn hình ảnh<select id="camera-source"><option value="usb">Webcam / camera USB</option><option value="ip">Camera IP / ESP32-CAM (MJPEG)</option></select></label><label id="camera-url-label" hidden>Địa chỉ luồng hình ảnh<input id="camera-url" type="url" placeholder="http://192.168.1.50:81/stream"></label><p class="form-hint">Nguồn camera chỉ hiển thị trực tiếp, không ghi hình. Camera không dùng để đo nhiệt độ hoặc nhận diện học sinh.</p><p id="camera-error" class="form-error" role="alert"></p><div class="dialog-actions"><button type="button" class="button secondary" id="stop-camera">Tắt camera</button><button type="submit" class="button primary">Mở camera</button></div></form></dialog>
+  <dialog id="help-dialog"><div class="dialog-heading"><div><span class="eyebrow">BẮT ĐẦU THẬT ĐƠN GIẢN</span><h2>Lớp học trong tầm tay</h2></div><button class="icon-button" data-close="help-dialog" aria-label="Đóng"><span data-icon="x"></span></button></div><div class="help-sections"><div><span class="step">01</span><div><h3>Khám phá với dữ liệu mẫu</h3><p>Chọn một học sinh và bấm “Quét thử thẻ”. Lần đầu vào lớp, lần tiếp theo ra lớp. Chờ 3 giây giữa hai lượt.</p></div></div><div><span class="step">02</span><div><h3>Chuẩn bị thiết bị</h3><p>ESP32 DevKit V1 + RC522 + DHT22. Sơ đồ chân, chương trình Arduino và hướng dẫn cài đặt có trong README.md của dự án.</p></div></div><div><span class="step">03</span><div><h3>Đưa lớp học lên trực tiếp</h3><p>Chạy máy chủ nội bộ, kết nối bằng khóa quản trị rồi thêm học sinh và gán UID thẻ. Các thay đổi được lưu vào SQLite.</p></div></div></div><button class="button primary full-width" data-close="help-dialog">Đã hiểu, bắt đầu thôi</button></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <dialog id="equipment-dialog"><div class="dialog-heading"><div><span class="eyebrow">THÔNG TIN THIẾT BỊ</span><h2 id="equipment-dialog-title">Chi tiết thiết bị</h2></div><button class="icon-button" data-close="equipment-dialog" aria-label="Đóng"><span data-icon="x"></span></button></div><div id="equipment-dialog-body"></div><div class="dialog-actions"><button class="button primary" data-close="equipment-dialog">Đóng</button></div></dialog>
+  <script src="school.js"></script>
+  <script src="connection.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

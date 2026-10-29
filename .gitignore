@@ -1,0 +1,9 @@
+.venv/
+.idea/
+*.tar.gz
+**/data/
+**/__pycache__/
+**/*.pyc
+.env
+classroom-hub/firmware/classroom_esp32/config.h
+**/.git_backup/
