@@ -463,7 +463,7 @@ def handler_for(store, serial_bridge=None):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--host', default='0.0.0.0')
-    parser.add_argument('--port', type=int, default=8080)
+    parser.add_argument('--port', type=int, default=int(os.environ.get('PORT', 8080)))
     parser.add_argument('--data-dir', default=str(ROOT / 'data'))
     args = parser.parse_args()
     store = Store(args.data_dir)
